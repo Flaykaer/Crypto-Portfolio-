@@ -1,5 +1,4 @@
 from binance.um_futures import UMFutures
-#import finplot as fplt
 import pandas as pd
 import pandas_ta as ta
 import numpy as np
@@ -389,60 +388,7 @@ def calc_limits(high_ser: dict[list[pd.core.series.Series]],
     lim_atr_loc = (atr_prev.max() - atr_prev.min()) * PARAMS["atr_limit"]
     return lim_amp_loc, lim_atr_loc
 
-# def calc_filter_on_alert(high_ser,
-#                          low_ser,
-#                          close_ser,
-#                          symb: str, i: int, lim_amp, lim_atr):
-#     """
-#     Считает первые точки фильтра при получении алерта.
-    
-#     Формирует списки значений фильтров за последние 5 минут до алерта
-#     по 26 последним минутным свечам и 2-м лимитам.
-#     """
-#     global PARAMS
-    
-#     start = PARAMS["block_min"] + PARAMS["length"] + 15   ### добавил +10 к +5
-#     atr = ta.atr(high_ser[symb][-start:], low_ser[symb][-start:], 
-#                  close_ser[symb][-start:], length=PARAMS["length"])
-#     f1_list = (atr.diff() > -lim_atr[symb]).tolist()[-PARAMS["block_min"]: ]
 
-#     if len(low_ser[symb].rolling(3)) == 0:
-#         bot.send_message(error_tg, f"ver 27 len(low_ser[symb].rolling(3)) == 0 in calc_filter_on_alert, i={i}, symb={symb}")  ### отладка - поиск min([])   -eg-
-
-#     amp = (high_ser[symb].rolling(3).max() - 
-#            low_ser[symb].rolling(3).min())
-#     f2_list = (amp.diff() > -lim_amp[symb]).tolist()[-PARAMS["block_min"]: ]
-#     return f1_list, f2_list
-
-# def filter_calc(lim_amp, lim_atr, symb: str, i: int) -> None:
-#     """
-#     Считает новые 2 точки фильтра за последнюю минуту.
-    
-#     Обновляет списки значений фильтров за 6 и 10 минут 
-#     по 16 последним минутным свечам и 2-м лимитам.
-#     """
-#     global high_ser, low_ser, close_ser, f1, f2, PARAMS
-    
-#     #if len(high_ser[symb]) != 17:
-#     #     return
-#     try:
-#         d_atr = ta.atr(high_ser[symb], low_ser[symb], 
-#                     close_ser[symb][-len(high_ser[symb]): ],
-#                     length=PARAMS["length"]).diff().values[-1]
-        
-        
-#         f1[symb]= f1[symb] + [d_atr > -lim_atr[symb]]
-#         f1[symb] = f1[symb][-PARAMS["block_min"] - 2: ]  ### добавил 2 минуты (донастройка по результату анализа)
-        
-#         d_amp = (max(high_ser[symb][-PARAMS["n"]: ]) - 
-#                 min(low_ser[symb][-PARAMS["n"]: ]) -
-#                 max(high_ser[symb][-PARAMS["n"] - 1: -1]) + 
-#                 min(low_ser[symb][-PARAMS["n"] - 1: -1]))
-#         f2[symb] = f2[symb] + [d_amp > -lim_amp[symb]]
-#         f2[symb] = f2[symb][-PARAMS["block_min"]: ]
-#     except:
-#         lim_atr[symb] = 0
-#         f2[symb] = []
     
  
 def cummul_chandle_calc(time_tick: int, price: float, symb: str, i: int, 
@@ -1189,15 +1135,10 @@ def rewrite(symb, price, time, channel_data_price, price_acc, high_acc, low_acc)
         max_average_bar_price[symb][0] = max_average_bar_price[symb][1]
         max_average_bar_price[symb][1] = 0
 
-        
-        #high_ser[symb], low_ser[symb], close_ser[symb] = calc_prev_min_chandles(channel_data_price, symb, 1)
+
         high_ser[symb], low_ser[symb], close_ser[symb] = pd.Series(high_acc[symb][-49:]), pd.Series(low_acc[symb][-49:]), pd.Series(price_acc[symb][-49:])
         
-        #lim_amp[symb], lim_atr[symb] = calc_limits(high_ser, low_ser, close_ser, 
-        #                                                symb, 1)
-        
-        #f1[symb], f2[symb] = calc_filter_on_alert(high_ser, low_ser, close_ser,
-        #                                                symb, 1, lim_amp, lim_atr)
+
         
         current_minute_start[symb] = time // 60000 * 60000
         current_minute_prices[symb] = []
@@ -1760,7 +1701,6 @@ def screen(symb, i, df, time_last_alert_algo_1, price_last_alert_algo_1, df_vol)
             
 
         except Exception as e:
-                #bot.send_message(screen_tg, f'fail screen {symb}')
                 bot.send_message(error_tg, f'a1_v27 fail screen {symb} i={i}\n\n{e}')
                 
                 channel_price[symb][i] = []
